@@ -1,4 +1,5 @@
 # private file ignore
+private_file.txt
 nanawo_tokens.json
 log.json
 
