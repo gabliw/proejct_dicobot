@@ -12,6 +12,7 @@ import json
 import math
 import urllib.request
 from twitter import Api
+from . import archive, translator
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 # parameter json loader
@@ -37,6 +38,7 @@ api = Api(
 # It will be updated as list
 nanawoakari = api.GetUser(screen_name=target_ID[0]).id_str
 nanawo_staff = api.GetUser(screen_name=target_ID[1]).id_str
+
 
 def strftime(data):
     return datetime.datetime.fromtimestamp(data + 3600 * 9).strftime('%Y-%m-%d %H:%M:%S')
@@ -65,33 +67,33 @@ def papago(text):
 
 
 async def getTweet(screen_name, discord):
-    archiveData = load_archive()
-    tweetData = api.GetUserTimeline(screen_name=screen_name, count=200, exclude_replies=True)
+    archive_data = archive.load_archive()
+    tweet_data = api.GetUserTimeline(screen_name=screen_name, count=200, exclude_replies=True)
 
     visit = []
 
-    for i in range(len(archiveData)):
-        visit.append(archiveData[i]["id"])
+    for i in range(len(archive_data)):
+        visit.append(archive_data[i]["id"])
 
-    for data in tweetData:
+    for data in tweet_data:
         if data.retweeted_status != None:
             continue
         if data.id in visit:
             continue
 
         newData = {"text": data.full_text, "id": data.id, "created_at": data.created_at}
-        archiveData.append(newData)
+        archive_data.append(newData)
         visit.append(data.id)
 
         translate = papago(newData["text"])
 
         if data.media != None:
-            await discord.get_channel(targetChannel).send("@%s: %s" % (screen_name, translate))
+            await discord.get_channel(targetChannels[0]).send("@%s: %s" % (screen_name, translate))
         else:
-            await discord.get_channel(targetChannel).send(
+            await discord.get_channel(targetChannels[0]).send(
                 "@%s: %s https://twitter.com/%s/status/%d" % (screen_name, translate, screen_name, data.id))
 
-    save_archive(archiveData)
+    archive.save_archive(archive_data)
 
 
 class KidarinTwitter(discord.Client):
@@ -100,15 +102,15 @@ class KidarinTwitter(discord.Client):
 
         while True:
             try:
-                await getTweet("nanawoakari", self)
+                await getTweet(target_ID[0], self)
             except:
                 pass
             try:
-                await getTweet("nanawo_STAFF", self)
+                await getTweet(target_ID[1], self)
             except:
                 pass
             try:
-                await getTweet("77ooooooooakrn", self)
+                await getTweet(target_ID[2], self)
             except:
                 pass
 
