@@ -12,12 +12,12 @@ import json
 import math
 import urllib.request
 from twitter import Api
-from . import archive, translator
+import archive, translator
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 # parameter json loader
-token_file_dir = os.path.join(*os.getcwd().split('\\')[1:-1])
-with open(os.path.join(os.sep, token_file_dir, "tokens.json")) as f:
+token_file_dir = os.path.join(*os.getcwd().split(os.sep())[1:-1])
+with open(os.path.join(os.sep, token_file_dir, "nanawo_tokens.json")) as f:
     access_info = json.load(f)
 
 # parameters
